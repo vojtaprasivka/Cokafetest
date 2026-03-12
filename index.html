@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
@@ -8,18 +8,13 @@
 
 body{
 font-family:Arial;
+background:#f5f5f5;
 text-align:center;
 padding:80px;
-background:#f5f5f5;
 }
 
-h1{
-font-size:40px;
-}
-
-p{
-font-size:20px;
-}
+h1{font-size:40px;}
+p{font-size:20px;}
 
 /* CHAT BUTTON */
 
@@ -38,9 +33,9 @@ cursor:pointer;
 box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* CHAT WINDOW */
+/* CHAT PANEL */
 
-.chat-window{
+.chat-box{
 position:fixed;
 bottom:90px;
 right:20px;
@@ -50,14 +45,58 @@ background:white;
 border-radius:12px;
 box-shadow:0 10px 30px rgba(0,0,0,0.3);
 display:none;
+flex-direction:column;
 overflow:hidden;
 }
 
-.chat-window a{
-display:block;
-padding:20px;
-text-decoration:none;
-color:black;
+/* HEADER */
+
+.chat-header{
+background:#6b4f4f;
+color:white;
+padding:15px;
+font-weight:bold;
+}
+
+/* MESSAGES */
+
+.chat-messages{
+flex:1;
+padding:15px;
+overflow-y:auto;
+font-size:14px;
+}
+
+/* INPUT */
+
+.chat-input{
+display:flex;
+border-top:1px solid #ddd;
+}
+
+.chat-input input{
+flex:1;
+padding:10px;
+border:none;
+outline:none;
+}
+
+.chat-input button{
+background:#6b4f4f;
+color:white;
+border:none;
+padding:10px 15px;
+cursor:pointer;
+}
+
+.user{
+text-align:right;
+margin:8px 0;
+}
+
+.bot{
+text-align:left;
+margin:8px 0;
 }
 
 </style>
@@ -68,23 +107,58 @@ color:black;
 <h1>AI chatbot COKAFE ☕</h1>
 <p>Zeptejte se našeho AI asistenta.</p>
 
-<button class="chat-toggle"
-onclick="window.open('https://horus13.app.n8n.cloud/webhook/ae641119-aa28-4f3f-9fe8-d2ef3ffc9388/chat','_blank')">
-💬
-</button>
+<!-- CHAT WINDOW -->
+
+<div id="chatBox" class="chat-box">
+
+<div class="chat-header">
+COKAFE AI ☕
+</div>
+
+<div id="messages" class="chat-messages"></div>
+
+<div class="chat-input">
+<input id="userInput" placeholder="Napište zprávu...">
+<button onclick="sendMessage()">➤</button>
+</div>
+
+</div>
 
 <button class="chat-toggle" onclick="toggleChat()">💬</button>
 
 <script>
 
 function toggleChat(){
-const chat = document.getElementById("chatWindow");
-
-if(chat.style.display === "block"){
-chat.style.display = "none";
-}else{
-chat.style.display = "block";
+const box = document.getElementById("chatBox");
+box.style.display = box.style.display === "flex" ? "none" : "flex";
 }
+
+async function sendMessage(){
+
+const input = document.getElementById("userInput");
+const text = input.value;
+
+if(!text) return;
+
+const messages = document.getElementById("messages");
+
+messages.innerHTML += `<div class="user">${text}</div>`;
+
+input.value="";
+
+const response = await fetch("https://horus13.app.n8n.cloud/webhook/ae641119-aa28-4f3f-9fe8-d2ef3ffc9388/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({message:text})
+});
+
+const data = await response.text();
+
+messages.innerHTML += `<div class="bot">${data}</div>`;
+
+messages.scrollTop = messages.scrollHeight;
 
 }
 
