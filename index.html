@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
@@ -53,10 +53,11 @@ display:none;
 overflow:hidden;
 }
 
-.chat-window iframe{
-width:100%;
-height:100%;
-border:none;
+.chat-window a{
+display:block;
+padding:20px;
+text-decoration:none;
+color:black;
 }
 
 </style>
@@ -67,13 +68,11 @@ border:none;
 <h1>AI chatbot COKAFE ☕</h1>
 <p>Zeptejte se našeho AI asistenta.</p>
 
-<!-- CHAT WINDOW -->
-
 <div id="chatWindow" class="chat-window">
-<iframe src="https://horus13.app.n8n.cloud/webhook/ae641119-aa28-4f3f-9fe8-d2ef3ffc9388/chat"></iframe>
+<a href="https://horus13.app.n8n.cloud/webhook/ae641119-aa28-4f3f-9fe8-d2ef3ffc9388/chat" target="_blank">
+Otevřít AI chat
+</a>
 </div>
-
-<!-- CHAT BUTTON -->
 
 <button class="chat-toggle" onclick="toggleChat()">💬</button>
 
