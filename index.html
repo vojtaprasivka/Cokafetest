@@ -151,7 +151,7 @@ method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({message:text})
+body:JSON.stringify({chatInput:text})
 });
 
 const data = await response.text();
