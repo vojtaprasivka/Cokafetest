@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
 <meta charset="UTF-8">
 <title>COKAFE AI Chat</title>
@@ -8,17 +9,22 @@
 
 body{
 font-family:Arial;
-background:#f5f5f5;
 text-align:center;
-padding:80px;
+padding:60px;
+background:#f5f5f5;
 }
 
-h1{font-size:40px;}
-p{font-size:20px;}
+h1{
+font-size:40px;
+}
 
-/* CHAT BUTTON */
+p{
+font-size:20px;
+}
 
-.chat-toggle{
+/* CHAT BUBBLE */
+
+.chat-button{
 position:fixed;
 bottom:20px;
 right:20px;
@@ -30,10 +36,10 @@ color:white;
 border:none;
 font-size:26px;
 cursor:pointer;
-box-shadow:0 4px 12px rgba(0,0,0,0.3);
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* CHAT PANEL */
+/* CHAT BOX */
 
 .chat-box{
 position:fixed;
@@ -42,7 +48,7 @@ right:20px;
 width:350px;
 height:500px;
 background:white;
-border-radius:12px;
+border-radius:14px;
 box-shadow:0 10px 30px rgba(0,0,0,0.3);
 display:none;
 flex-direction:column;
@@ -66,33 +72,47 @@ padding:15px;
 overflow-y:auto;
 font-size:14px;
 text-align:left;
-height:350px;
+display:flex;
+flex-direction:column;
 }
 
-/* USER MESSAGE */
+/* MESSAGE STYLE */
+
+.message{
+animation:fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* USER */
 
 .user{
 background:#e8e8e8;
 padding:10px 14px;
 border-radius:12px;
-margin:10px 0;
-display:inline-block;
+margin:8px 0;
 max-width:80%;
-float:right;
-clear:both;
+align-self:flex-end;
 }
 
-/* BOT MESSAGE */
+/* BOT */
 
 .bot{
 background:#f1f1f1;
 padding:10px 14px;
 border-radius:12px;
-margin:10px 0;
-display:inline-block;
+margin:8px 0;
 max-width:80%;
-float:left;
-clear:both;
+align-self:flex-start;
 }
 
 /* INPUT */
@@ -104,17 +124,17 @@ border-top:1px solid #ddd;
 
 .chat-input input{
 flex:1;
-padding:10px;
 border:none;
-outline:none;
+padding:12px;
 font-size:14px;
+outline:none;
 }
 
 .chat-input button{
 background:#6b4f4f;
 color:white;
 border:none;
-padding:10px 15px;
+padding:12px 18px;
 cursor:pointer;
 }
 
@@ -126,110 +146,113 @@ cursor:pointer;
 <h1>AI chatbot COKAFE ☕</h1>
 <p>Zeptejte se našeho AI asistenta.</p>
 
-<!-- CHAT WINDOW -->
+<!-- CHAT BUTTON -->
 
-<div id="chatBox" class="chat-box">
+<button class="chat-button" onclick="toggleChat()">💬</button>
+
+<!-- CHAT BOX -->
+
+<div class="chat-box" id="chat">
 
 <div class="chat-header">
 Espresso ☕
 </div>
 
-<div id="messages" class="chat-messages"></div>
+<div class="chat-messages" id="messages"></div>
 
 <div class="chat-input">
-<input id="userInput" placeholder="Napište zprávu...">
+<input id="input" placeholder="Napište zprávu...">
 <button onclick="sendMessage()">➤</button>
 </div>
 
 </div>
 
-<button class="chat-toggle" onclick="toggleChat()">💬</button>
-
 <script>
 
-/* OPEN / CLOSE CHAT */
-
 function toggleChat(){
-
-const box = document.getElementById("chatBox");
-
-if(box.style.display === "block"){
-box.style.display = "none";
-}else{
-box.style.display = "block";
+const chat = document.getElementById("chat");
+chat.style.display = chat.style.display === "flex" ? "none" : "flex";
 }
-
-}
-
-/* SEND MESSAGE */
 
 async function sendMessage(){
 
-const input = document.getElementById("userInput");
-const text = input.value.trim();
-
-if(!text) return;
-
+const input = document.getElementById("input");
 const messages = document.getElementById("messages");
+
+if(!input.value) return;
+
+const text = input.value;
 
 /* USER MESSAGE */
 
-messages.innerHTML += `<div class="user">${text}</div>`;
+const user = document.createElement("div");
+user.className = "user message";
+user.innerText = text;
 
-input.value="";
+messages.appendChild(user);
+
+/* CLEAR INPUT */
+
+input.value = "";
 input.focus();
 
-/* LOADING */
-
-const loading = document.createElement("div");
-loading.className = "bot";
-loading.innerText = "Espresso píše...";
-messages.appendChild(loading);
+/* SCROLL */
 
 messages.scrollTop = messages.scrollHeight;
 
-try{
+/* TYPING */
+
+const typing = document.createElement("div");
+typing.className = "bot message";
+typing.innerText = "Espresso píše...";
+messages.appendChild(typing);
+
+messages.scrollTop = messages.scrollHeight;
+
+/* REQUEST */
 
 const response = await fetch("https://horus13.app.n8n.cloud/webhook/ae641119-aa28-4f3f-9fe8-d2ef3ffc9388/chat",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({chatInput:text})
+body:JSON.stringify({
+message:text
+})
 });
 
 const data = await response.json();
 
-loading.remove();
+/* REMOVE TYPING */
 
-/* FORMAT RESPONSE */
+typing.remove();
 
-const formatted = data.output
-.replace(/\*\*/g,"")
-.replace(/\n/g,"<br><br>");
+/* FORMAT TEXT */
 
-messages.innerHTML += `<div class="bot">${formatted}</div>`;
+let reply = data.output || data.message || "Omlouvám se, něco se pokazilo.";
+
+reply = reply.replace(/\n/g,"<br><br>");
+
+/* BOT MESSAGE */
+
+const bot = document.createElement("div");
+bot.className = "bot message";
+bot.innerHTML = reply;
+
+messages.appendChild(bot);
+
+/* SCROLL */
 
 messages.scrollTop = messages.scrollHeight;
-
-}catch(error){
-
-loading.remove();
-messages.innerHTML += `<div class="bot">Chyba spojení s AI.</div>`;
-
-}
 
 }
 
 /* ENTER SEND */
 
-document.getElementById("userInput")
-.addEventListener("keypress",function(e){
-
-if(e.key==="Enter"){
+document.getElementById("input").addEventListener("keypress",function(e){
+if(e.key === "Enter"){
 sendMessage();
 }
-
 });
 
 </script>
