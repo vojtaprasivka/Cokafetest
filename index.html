@@ -183,7 +183,11 @@ loading.remove();
 
 /* show AI response */
 
-messages.innerHTML += `<div class="bot">${data.output}</div>`;
+const formatted = data.output
+.replace(/\*\*/g,"")
+.replace(/\n/g,"<br><br>");
+
+messages.innerHTML += `<div class="bot">${formatted}</div>`;
 
 messages.scrollTop = messages.scrollHeight;
 
